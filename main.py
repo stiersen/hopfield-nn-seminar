@@ -7,23 +7,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button 
 from time import sleep
-
+from rect import SelectionRect
 def hopfield60by60():
-    image = plt.imread("1bitImageRiver.bmp")
-    width = image.shape[0]
-    image_ones = np.array(list(map(
+    image1 = plt.imread("1bitImageRiver.bmp")
+    width = image1.shape[0]
+    image_ones1 = np.array(list(map(
         lambda x: -1 if x[0]==0 else 1
-        , image.reshape((width*width,4))))).reshape(width,width)
-    print(image_ones.shape)
+        , image1.reshape((width*width,4))))).reshape(width,width)
+    
+    image2 = plt.imread("circle1bit.bmp")
+    width = image2.shape[0]
+    image_ones2 = np.array(list(map(
+        lambda x: -1 if x[0]==0 else 1
+        , image2.reshape((width*width,4))))).reshape(width,width)
     h = Hopfield(width)
-    h.add_shape(image_ones)
+    h.add_shape(image_ones1)
+    h.add_shape(image_ones2)
     h.train_all_shapes()
-    h.set_network(image_ones)
+    h.set_network(image_ones1)
     print("training...")
     update_counter = np.array([0])
 
-
-    pltimage = plt.imshow(h.network)
+    fig, imgax = plt.subplots()
+    pltimage = imgax.imshow(h.network)
     # pause_and_update()
 
     def plt_do_sync_iteration(event):
@@ -57,6 +63,15 @@ def hopfield60by60():
         h.set_network(image_noised)
         pltimage.set_data(h.network)
         plt.draw()
+    def on_box_release(pos, size):
+        image_box_cleared = h.network.copy()
+        size = [min(x, h.N) for x in size]
+        for x in range(pos[0],pos[0]+size[0]):
+            for y in range(pos[1],pos[1]+size[1]):
+                image_box_cleared[y][x] = -1
+        h.set_network(image_box_cleared)
+        pltimage.set_data(h.network)
+        plt.draw()
     # plt.draw()
     # plt.imshow(h.network)
     # ax = plt.axes()
@@ -72,6 +87,11 @@ def hopfield60by60():
     ax = plt.axes([0.8, 0, 0.2, 0.075])
     bnoise = Button(ax, 'Add Noise')
     bnoise.on_clicked(add_noise)
+
+
+    s_rect = SelectionRect(imgax,fig.canvas,on_box_release)
+    s_rect.connect()
+
     plt.show()
 
 def hopfield4by4():
