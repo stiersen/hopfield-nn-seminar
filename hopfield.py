@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 import numpy as np
+import random
+
+from setuptools.command.bdist_egg import iter_symbols
+
 """
 adds the network at the desired position to the asci canvas
 """
@@ -26,19 +30,20 @@ def asci_print(np_asci_canvas):
     print(str)
 
 def get_as_1D(np_arr):
-    return np.reshape(np_arr.copy(), (1,np_arr.size))
+    return np.reshape(np_arr, (1,np_arr.size))
 def get_as_2D(np_arr, width):
     return np.reshape(np_arr.copy(), (width,int(np_arr.size/width)))
 
-def train_weights(sample_list):
-    weights = np.zeros((sample_list[0].size,sample_list[0].size))
-    for network in sample_list:
-        net1d = get_as_1D(network)
-        for i in range(net1d.size):
-            for k in range(net1d.size):
-                weights[i, k] += net1d[0,i] * net1d[0,k]
-    np.fill_diagonal(weights,0)
-    return weights
+# def train_weights(sample_list):
+#     weights = np.zeros((sample_list[0].size,sample_list[0].size))
+#     for network in sample_list:
+#         net1d = get_as_1D(network)
+#         for i in range(net1d.size):
+#             print("row %d"% i)
+#             for k in range(net1d.size):
+#                 weights[i, k] += net1d[0,i] * net1d[0,k]
+#     np.fill_diagonal(weights,0)
+#     return weights
 
 def calc_test():
     cross = np.array([[1,-1,1],
@@ -82,7 +87,11 @@ class Hopfield:
             print("training shape%d"%index)
             index += 1
             net1d = get_as_1D(net)
+            iters_per_percent = int(net1d.size / 100.0)
+            iters_per_percent = max(1,iters_per_percent)
             for i in range(net1d.size):
+                if i%iters_per_percent==0:
+                    print("process {}%".format(int(i/iters_per_percent)))
                 for k in range(net1d.size):
                     w_ij = net1d[0,i] * net1d[0,k]
                     self.weights[i, k] += w_ij
@@ -92,9 +101,31 @@ class Hopfield:
     def set_network(self, network):
         self.network = network
 
-    def update(self):
-        # net1d = get_as_1D(self.network)
+    def sync_update(self):
+        net1d = get_as_1D(self.network)
         new_net = np.matmul(self.weights, self.network.flatten()) #W S from eq 1 hopfield.pdf
-        li = list(map(lambda el: net1d[el[0]] if el[1]==0 else (-1 if el[1] < 0 else 1), enumerate(new_net)))
+        li = list(map(
+            lambda el: net1d[0][el[0]] if el[1]==0 else (-1 if el[1] < 0 else 1)
+            , enumerate(new_net)))
         self.network = np.array(li)
+        self.network.shape = (self.N,self.N)
+    def async_update_ordered(self, iter_step_callback):
+        for i in range(self.N*self.N):
+            self.update_neuron(i)
+            iter_step_callback()
+    def async_update_ordered_inv(self, iter_step_callback):
+        for i in range(self.N*self.N):
+            self.update_neuron(self.N*self.N-1-i)
+            iter_step_callback()
+    def async_update_shuffeled(self, iter_step_callback):
+        list = [x for x in range(self.N*self.N)]
+        random.shuffle(list)
+        for i in list:
+            self.update_neuron(i)
+            iter_step_callback()
+    def update_neuron(self, i):
+        net1d = get_as_1D(self.network)
+        new_net = np.matmul(self.weights, self.network.flatten()) #W S from eq 1 hopfield.pdf
+        net1d[0][i] = net1d[0][i] if new_net[i]==0 else (-1 if new_net[i] < 0 else 1)
+        self.network = net1d
         self.network.shape = (self.N,self.N)
