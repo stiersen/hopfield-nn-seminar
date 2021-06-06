@@ -83,20 +83,26 @@ class Hopfield:
     def train_all_shapes(self):
         self.weights = np.zeros((self.shapes[0].size, self.shapes[0].size))
         index = 1
+        # for net in self.shapes:
+        #     print("training shape%d"%index)
+        #     index += 1
+        #     net1d = get_as_1D(net)
+        #     iters_per_percent = int(net1d.size / 100.0)
+        #     iters_per_percent = max(1,iters_per_percent)
+            
+        #     for i in range(net1d.size):
+        #         if i%iters_per_percent==0:
+        #             print("process {}%".format(int(i/iters_per_percent)))
+        #         for k in range(net1d.size):
+        #             w_ij = net1d[0,i] * net1d[0,k]
+        #             self.weights[i, k] += w_ij
+        #             self.weights[k, i] += w_ij # It would be possible to also ignore the lower half triangle entirely.
         for net in self.shapes:
             print("training shape%d"%index)
-            index += 1
+            index += 1  
             net1d = get_as_1D(net)
-            iters_per_percent = int(net1d.size / 100.0)
-            iters_per_percent = max(1,iters_per_percent)
-            for i in range(net1d.size):
-                if i%iters_per_percent==0:
-                    print("process {}%".format(int(i/iters_per_percent)))
-                for k in range(net1d.size):
-                    w_ij = net1d[0,i] * net1d[0,k]
-                    self.weights[i, k] += w_ij
-                    self.weights[k, i] += w_ij # It would be possible to also ignore the lower half triangle entirely.
-        np.fill_diagonal(self.weights,0)
+            self.weights = np.outer(net1d[0],net1d[0])
+            np.fill_diagonal(self.weights,0)
     
     def set_network(self, network):
         self.network = network
@@ -104,9 +110,16 @@ class Hopfield:
     def sync_update(self):
         net1d = get_as_1D(self.network)
         new_net = np.matmul(self.weights, self.network.flatten()) #W S from eq 1 hopfield.pdf
+
+        # 1 1 1 1     1
+        # 1 1 1 1     2
+        # 1 1 1 1     3
+        # 1 1 1 1     2
+        # wird das neuron nicht geaendert, wenn die Summe der weights = 0 ist
         li = list(map(
             lambda el: net1d[0][el[0]] if el[1]==0 else (-1 if el[1] < 0 else 1)
             , enumerate(new_net)))
+        # li_alt = list(map( lambda x: -1 if x < 0 else 1,new_net))
         self.network = np.array(li)
         self.network.shape = (self.N,self.N)
     def async_update_ordered(self, iter_step_callback):
@@ -127,5 +140,6 @@ class Hopfield:
         net1d = get_as_1D(self.network)
         new_net = np.matmul(self.weights, self.network.flatten()) #W S from eq 1 hopfield.pdf
         net1d[0][i] = net1d[0][i] if new_net[i]==0 else (-1 if new_net[i] < 0 else 1)
+        # net1d[0][i] = -1 if new_net[i] < 0 else 1
         self.network = net1d
         self.network.shape = (self.N,self.N)

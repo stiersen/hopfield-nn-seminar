@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Button 
 from time import sleep
 from rect import SelectionRect
+
+plot_axes_pos = [0.1,0.16,0.8,0.8]
 def asterixObelix():
     image_paths = ["asterixObelixChars/asterix.bmp",
         "asterixObelixChars/idefix.bmp",
@@ -18,7 +20,7 @@ def asterixObelix():
     for path in image_paths:
         image = plt.imread(path)
         image_ones = np.array(list(map(
-            lambda x: -1 if x[0]==0 else 1
+            lambda x: 1 if x[0]==0 else -1
             , image.reshape((N*N,4))))).reshape(N,N)
         h.add_shape(image_ones)
 
@@ -26,7 +28,8 @@ def asterixObelix():
     h.set_network(h.shapes[0])
 
     fig, imgax = plt.subplots()
-    pltimage = imgax.imshow(h.network)
+    imgax.set_position(plot_axes_pos)
+    pltimage = imgax.imshow(h.network, cmap=plt.get_cmap("binary"))
 
     def plt_do_sync_iteration(event):
         hopfield.asci_print(h.network)
@@ -65,7 +68,7 @@ def asterixObelix():
         size = [min(x, h.N) for x in size]
         for x in range(pos[0],pos[0]+size[0]):
             for y in range(pos[1],pos[1]+size[1]):
-                image_box_cleared[y][x] = -1
+                image_box_cleared[y][x] = 1
         h.set_network(image_box_cleared)
         pltimage.set_data(h.network)
         plt.draw()
@@ -105,11 +108,11 @@ def asterixObelix():
 
     plt.show()
 
-def hopfield60by60():
+def hopfield20by20():
     image1 = plt.imread("1bitImageRiver.bmp")
     width = image1.shape[0]
     image_ones1 = np.array(list(map(
-        lambda x: -1 if x[0]==0 else 1
+        lambda x: 1 if x[0]==0 else -1
         , image1.reshape((width*width,4))))).reshape(width,width)
     
     image2 = plt.imread("circle1bit.bmp")
@@ -122,11 +125,11 @@ def hopfield60by60():
     h.add_shape(image_ones2)
     h.train_all_shapes()
     h.set_network(image_ones1)
-    print("training...")
     update_counter = np.array([0])
 
     fig, imgax = plt.subplots()
-    pltimage = imgax.imshow(h.network)
+    imgax.set_position(plot_axes_pos)
+    pltimage = imgax.imshow(h.network, cmap=plt.get_cmap("binary"))
     # pause_and_update()
 
     def plt_do_sync_iteration(event):
@@ -155,7 +158,7 @@ def hopfield60by60():
 
     def add_noise(event=None):
         image_noised = h.network.copy()
-        for i in range(200):
+        for i in range(100):
             image_noised[randint(0, width-1)][randint(0, width-1)] = randint(0,1)*2-1
         h.set_network(image_noised)
         pltimage.set_data(h.network)
@@ -214,7 +217,10 @@ def hopfield4by4():
 
     h.set_network(start)
 
-    pltimage = plt.imshow(h.network)
+    fig, imgax = plt.subplots()
+    imgax.set_position(plot_axes_pos)
+    pltimage = imgax.imshow(h.network, cmap=plt.get_cmap("binary"))
+
     def plt_do_sync_iteration(event):
         hopfield.asci_print(h.network)
         h.sync_update()
@@ -269,7 +275,9 @@ def hopfield3by3():
 
     h.set_network(start)
 
-    pltimage = plt.imshow(h.network)
+    fig, imgax = plt.subplots()
+    imgax.set_position(plot_axes_pos)
+    pltimage = imgax.imshow(h.network, cmap=plt.get_cmap("binary"))
     def plt_reset(event):
         start = np.array([[1,1,-1],
         [1,-1,1],
@@ -301,6 +309,7 @@ def hopfield3by3():
     def pause_and_update():
         plt.pause(0.02)
         pltimage.set_data(h.network)
+        plt.draw()
         
     # plt.draw()
     # plt.imshow(h.network)
@@ -326,7 +335,7 @@ def hopfield3by3():
 
 
 
-# hopfield4by4()
+#hopfield4by4()#---wasted
 # hopfield3by3()
-# hopfield60by60()
+# hopfield20by20()
 asterixObelix()
