@@ -8,6 +8,103 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Button 
 from time import sleep
 from rect import SelectionRect
+def asterixObelix():
+    image_paths = ["asterixObelixChars/asterix.bmp",
+        "asterixObelixChars/idefix.bmp",
+        "asterixObelixChars/miraculix.bmp",
+        "asterixObelixChars/obelix.bmp"]
+    N = plt.imread(image_paths[0]).shape[0]
+    h = Hopfield(N)
+    for path in image_paths:
+        image = plt.imread(path)
+        image_ones = np.array(list(map(
+            lambda x: -1 if x[0]==0 else 1
+            , image.reshape((N*N,4))))).reshape(N,N)
+        h.add_shape(image_ones)
+
+    h.train_all_shapes()
+    h.set_network(h.shapes[0])
+
+    fig, imgax = plt.subplots()
+    pltimage = imgax.imshow(h.network)
+
+    def plt_do_sync_iteration(event):
+        hopfield.asci_print(h.network)
+        h.sync_update()
+        pltimage.set_data(h.network)
+        plt.draw()
+    def plt_do_ordered_async_iteration(event):
+        hopfield.asci_print(h.network)
+        h.async_update_ordered(pause_and_update)
+        pltimage.set_data(h.network)
+        plt.draw()
+    def plt_do_shuffle_async_iteration(event):
+        hopfield.asci_print(h.network)
+        h.async_update_shuffeled(pause_and_update)
+        pltimage.set_data(h.network)
+        plt.draw()
+    
+    update_counter = np.array([0])
+    def pause_and_update():
+        pltimage.set_data(h.network)
+        update_counter[0]+=1
+        if update_counter[0]%40==0:
+            plt.draw()
+            plt.pause(0.0000000001)
+            update_counter[0]=0
+
+    def add_noise(event=None):
+        image_noised = h.network.copy()
+        for i in range(200):
+            image_noised[randint(0, N-1)][randint(0, N-1)] = randint(0,1)*2-1
+        h.set_network(image_noised)
+        pltimage.set_data(h.network)
+        plt.draw()
+    def on_box_release(pos, size):
+        image_box_cleared = h.network.copy()
+        size = [min(x, h.N) for x in size]
+        for x in range(pos[0],pos[0]+size[0]):
+            for y in range(pos[1],pos[1]+size[1]):
+                image_box_cleared[y][x] = -1
+        h.set_network(image_box_cleared)
+        pltimage.set_data(h.network)
+        plt.draw()
+
+    def random_memeory(event):
+        h.network = h.shapes[randint(0,len(h.shapes)-1)]
+        pltimage.set_data(h.network)
+        plt.draw()
+
+    def invert_network(event):
+        h.network = h.network*-1
+        pltimage.set_data(h.network)
+        plt.draw()
+    
+    ax = plt.axes([0.2, 0, 0.2, 0.075])
+    bsync = Button(ax, 'Do Sync')
+    bsync.on_clicked(plt_do_sync_iteration)
+    ax = plt.axes([0.4, 0, 0.2, 0.075])
+    border = Button(ax, 'Do Asyn Ordered')
+    border.on_clicked(plt_do_ordered_async_iteration)
+    ax = plt.axes([0.6, 0, 0.2, 0.075])
+    bshuffle = Button(ax, 'Do Asyn Shuffle')
+    bshuffle.on_clicked(plt_do_shuffle_async_iteration)
+    ax = plt.axes([0.8, 0, 0.2, 0.075])
+    bnoise = Button(ax, 'Add Noise')
+    bnoise.on_clicked(add_noise)
+    ax = plt.axes([0.1, 0, 0.1, 0.075])
+    b_rand = Button(ax, 'Rand')
+    b_rand.on_clicked(random_memeory)
+    ax = plt.axes([0.0, 0, 0.1, 0.075])
+    b_inv = Button(ax, 'Inv')
+    b_inv.on_clicked(invert_network)
+
+
+    s_rect = SelectionRect(imgax, fig.canvas, on_box_release)
+    s_rect.connect()
+
+    plt.show()
+
 def hopfield60by60():
     image1 = plt.imread("1bitImageRiver.bmp")
     width = image1.shape[0]
@@ -72,9 +169,7 @@ def hopfield60by60():
         h.set_network(image_box_cleared)
         pltimage.set_data(h.network)
         plt.draw()
-    # plt.draw()
-    # plt.imshow(h.network)
-    # ax = plt.axes()
+
     ax = plt.axes([0.2, 0, 0.2, 0.075])
     bsync = Button(ax, 'Do Sync')
     bsync.on_clicked(plt_do_sync_iteration)
@@ -89,7 +184,7 @@ def hopfield60by60():
     bnoise.on_clicked(add_noise)
 
 
-    s_rect = SelectionRect(imgax,fig.canvas,on_box_release)
+    s_rect = SelectionRect(imgax, fig.canvas, on_box_release)
     s_rect.connect()
 
     plt.show()
@@ -233,4 +328,5 @@ def hopfield3by3():
 
 # hopfield4by4()
 # hopfield3by3()
-hopfield60by60()
+# hopfield60by60()
+asterixObelix()
