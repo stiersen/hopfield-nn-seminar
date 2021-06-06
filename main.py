@@ -335,7 +335,7 @@ def hopfield3by3():
 
 
 
-#hopfield4by4()#---wasted
+# hopfield4by4()#---wasted
 # hopfield3by3()
 # hopfield20by20()
 asterixObelix()

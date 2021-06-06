@@ -83,26 +83,12 @@ class Hopfield:
     def train_all_shapes(self):
         self.weights = np.zeros((self.shapes[0].size, self.shapes[0].size))
         index = 1
-        # for net in self.shapes:
-        #     print("training shape%d"%index)
-        #     index += 1
-        #     net1d = get_as_1D(net)
-        #     iters_per_percent = int(net1d.size / 100.0)
-        #     iters_per_percent = max(1,iters_per_percent)
-            
-        #     for i in range(net1d.size):
-        #         if i%iters_per_percent==0:
-        #             print("process {}%".format(int(i/iters_per_percent)))
-        #         for k in range(net1d.size):
-        #             w_ij = net1d[0,i] * net1d[0,k]
-        #             self.weights[i, k] += w_ij
-        #             self.weights[k, i] += w_ij # It would be possible to also ignore the lower half triangle entirely.
         for net in self.shapes:
             print("training shape%d"%index)
-            index += 1  
+            index += 1 
             net1d = get_as_1D(net)
-            self.weights = np.outer(net1d[0],net1d[0])
-            np.fill_diagonal(self.weights,0)
+            self.weights += np.outer(net1d[0],net1d[0])
+        np.fill_diagonal(self.weights,0)
     
     def set_network(self, network):
         self.network = network
