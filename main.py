@@ -50,11 +50,13 @@ def asterixObelix(show_weights = False):
         brainDmgButton.label.set_text("~"+str(total_brain_damage.count)+" %")
         pltimage_weights.set_data(h.weights)
         plt.draw()
+
     def reset_brain_damage(event):
         h.reset_damage_brain()
         brainDmgButton.label.set_text(ADD_BRAIN_DEMAGE_LABEL)
         pltimage_weights.set_data(h.weights)
         plt.draw()
+        total_brain_damage.count = 0
         print("reset")
     def plt_do_ordered_async_iteration(event):
         hopfield.asci_print(h.network)

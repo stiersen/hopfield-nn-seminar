@@ -2,7 +2,7 @@
 import numpy as np
 import random
 from random import randint
-
+import array
 
 from setuptools.command.bdist_egg import iter_symbols
 
@@ -87,11 +87,10 @@ class Hopfield:
     def set_brain_damage(self, percent):
         demaged_weights = self.weights.flatten()
         count = self.N**4
-        i=0
-        while i < count:
-            i += max(0, randint(int(100/percent-10),int(100/percent+10)))
-            demaged_weights[min(i,2559999)] = 0
-        self.weights = demaged_weights.reshape(self.N**2, self.N**2)
+        choices = [0 if x<percent/10 else 1 for x in range(10)]
+        picker = np.random.choice(choices, 2560000)
+        self.weights = (demaged_weights * picker).reshape(self.N**2, self.N**2)
+
     def reset_damage_brain(self):
         self.weights = self.weight_noncorrupted
         self.total_brain_damage = 0
