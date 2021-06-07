@@ -10,9 +10,9 @@ class SelectionRect:
         self.dragpos = [[0,0],[0,0]]
         
     def on_press(self, event):
-        print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-          ('double' if event.dblclick else 'single', event.button,
-           event.x, event.y, event.xdata, event.ydata))
+        # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+        #   ('double' if event.dblclick else 'single', event.button,
+        #    event.x, event.y, event.xdata, event.ydata))
         if event.inaxes != self.ax:
             return
         self.press = 1
@@ -37,7 +37,6 @@ class SelectionRect:
         print("BOX: x:{},y:{}   w:{}h:{}".format(self.rectStart[0], self.rectStart[0], width, height))
     def on_motion(self, event):
         if self.press is None or event.inaxes != self.ax:
-            print("{}{}".format(self.ax, event.inaxes))
             return
         self.dragpos[1] = [round(event.xdata), round(event.ydata)]
         dp = self.dragpos

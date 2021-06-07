@@ -1,3 +1,4 @@
+from functools import total_ordering
 from random import randint
 from numpy.lib.histograms import _histogram_dispatcher
 from numpy.lib.type_check import imag
@@ -10,7 +11,11 @@ from time import sleep
 from rect import SelectionRect
 
 plot_axes_pos = [0.1,0.16,0.8,0.8]
-def asterixObelix():
+brainDmgButton = None
+class DmgCounter:
+    count = 0
+total_brain_damage = DmgCounter()
+def asterixObelix(show_weights = False):
     image_paths = ["asterixObelixChars/asterix.bmp",
         "asterixObelixChars/idefix.bmp",
         "asterixObelixChars/miraculix.bmp",
@@ -23,12 +28,14 @@ def asterixObelix():
             lambda x: 1 if x[0]==0 else -1
             , image.reshape((N*N,4))))).reshape(N,N)
         h.add_shape(image_ones)
-
+    ADD_BRAIN_DEMAGE_LABEL = "Add brain dmg"
     h.train_all_shapes()
     h.set_network(h.shapes[0])
-
-    fig, imgax = plt.subplots()
-    imgax.set_position(plot_axes_pos)
+    fig, [imgax,imax_weights] = plt.subplots(1,2 if show_weights else 1)
+    if not show_weights:
+        imgax.set_position(plot_axes_pos)
+    else:
+        pltimage_weights = imax_weights.imshow(h.weights)
     pltimage = imgax.imshow(h.network, cmap=plt.get_cmap("binary"))
 
     def plt_do_sync_iteration(event):
@@ -36,6 +43,19 @@ def asterixObelix():
         h.sync_update()
         pltimage.set_data(h.network)
         plt.draw()
+
+    def add_brain_damage(event):
+        total_brain_damage.count += 10
+        h.set_brain_damage(total_brain_damage.count)
+        brainDmgButton.label.set_text("~"+str(total_brain_damage.count)+" %")
+        pltimage_weights.set_data(h.weights)
+        plt.draw()
+    def reset_brain_damage(event):
+        h.reset_damage_brain()
+        brainDmgButton.label.set_text(ADD_BRAIN_DEMAGE_LABEL)
+        pltimage_weights.set_data(h.weights)
+        plt.draw()
+        print("reset")
     def plt_do_ordered_async_iteration(event):
         hopfield.asci_print(h.network)
         h.async_update_ordered(pause_and_update)
@@ -101,6 +121,13 @@ def asterixObelix():
     ax = plt.axes([0.0, 0, 0.1, 0.075])
     b_inv = Button(ax, 'Inv')
     b_inv.on_clicked(invert_network)
+
+    ax = plt.axes([0.0, 0.075, 0.2, 0.075])
+    b_reset_dmg = Button(ax, 'Reset dagmage')
+    b_reset_dmg.on_clicked(reset_brain_damage)
+    ax = plt.axes([0.0, 0.15, 0.2, 0.075])
+    brainDmgButton = Button(ax, ADD_BRAIN_DEMAGE_LABEL)
+    brainDmgButton.on_clicked(add_brain_damage)
 
 
     s_rect = SelectionRect(imgax, fig.canvas, on_box_release)
@@ -338,4 +365,5 @@ def hopfield3by3():
 # hopfield4by4()#---wasted
 # hopfield3by3()
 # hopfield20by20()
-asterixObelix()
+# asterixObelix()
+asterixObelix(True) # show weights

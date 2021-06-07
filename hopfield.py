@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import numpy as np
 import random
+from random import randint
+
 
 from setuptools.command.bdist_egg import iter_symbols
 
@@ -73,6 +75,8 @@ class Hopfield:
     shapes = []
     network = []
     weights = []
+    weight_noncorrupted = []
+    total_brain_damage = 0
     def __init__(self, N):
         self.N = N
         self.network = np.full((5,10),-1)
@@ -80,6 +84,18 @@ class Hopfield:
     def add_shape(self, shape):
         self.shapes.append(shape)
 
+    def set_brain_damage(self, percent):
+        demaged_weights = self.weights.flatten()
+        count = self.N**4
+        i=0
+        while i < count:
+            i += max(0, randint(int(100/percent-10),int(100/percent+10)))
+            demaged_weights[min(i,2559999)] = 0
+        self.weights = demaged_weights.reshape(self.N**2, self.N**2)
+    def reset_damage_brain(self):
+        self.weights = self.weight_noncorrupted
+        self.total_brain_damage = 0
+    
     def train_all_shapes(self):
         self.weights = np.zeros((self.shapes[0].size, self.shapes[0].size))
         index = 1
@@ -89,6 +105,7 @@ class Hopfield:
             net1d = get_as_1D(net)
             self.weights += np.outer(net1d[0],net1d[0])
         np.fill_diagonal(self.weights,0)
+        self.weight_noncorrupted = self.weights.copy()
     
     def set_network(self, network):
         self.network = network
