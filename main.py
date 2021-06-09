@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from functools import total_ordering
 from random import randint
 from numpy.lib.histograms import _histogram_dispatcher
@@ -9,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Button 
 from time import sleep
 from rect import SelectionRect
-
+from asci_print import asci_print
 plot_axes_pos = [0.1,0.16,0.8,0.8]
 brainDmgButton = None
 class DmgCounter:
@@ -31,15 +32,18 @@ def asterixObelix(show_weights = False):
     ADD_BRAIN_DEMAGE_LABEL = "Add brain dmg"
     h.train_all_shapes()
     h.set_network(h.shapes[0])
-    fig, [imgax,imax_weights] = plt.subplots(1,2 if show_weights else 1)
     if not show_weights:
+        fig, imgax = plt.subplots()
         imgax.set_position(plot_axes_pos)
     else:
+        fig, [imgax, imax_weights] = plt.subplots(1,2)
         pltimage_weights = imax_weights.imshow(h.weights)
+        imgax.set_position([0.0,0.38,0.5,0.5])
+        imax_weights.set_position([0.5,0.38,0.5,0.5])
     pltimage = imgax.imshow(h.network, cmap=plt.get_cmap("binary"))
 
     def plt_do_sync_iteration(event):
-        hopfield.asci_print(h.network)
+        asci_print(h.network)
         h.sync_update()
         pltimage.set_data(h.network)
         plt.draw()
@@ -59,12 +63,12 @@ def asterixObelix(show_weights = False):
         total_brain_damage.count = 0
         print("reset")
     def plt_do_ordered_async_iteration(event):
-        hopfield.asci_print(h.network)
+        # asci_print(h.network)
         h.async_update_ordered(pause_and_update)
         pltimage.set_data(h.network)
         plt.draw()
     def plt_do_shuffle_async_iteration(event):
-        hopfield.asci_print(h.network)
+        # asci_print(h.network)
         h.async_update_shuffeled(pause_and_update)
         pltimage.set_data(h.network)
         plt.draw()
@@ -73,7 +77,7 @@ def asterixObelix(show_weights = False):
     def pause_and_update():
         pltimage.set_data(h.network)
         update_counter[0]+=1
-        if update_counter[0]%40==0:
+        if update_counter[0]%80==0:
             plt.draw()
             plt.pause(0.0000000001)
             update_counter[0]=0
@@ -124,12 +128,13 @@ def asterixObelix(show_weights = False):
     b_inv = Button(ax, 'Inv')
     b_inv.on_clicked(invert_network)
 
-    ax = plt.axes([0.0, 0.075, 0.2, 0.075])
-    b_reset_dmg = Button(ax, 'Reset dagmage')
-    b_reset_dmg.on_clicked(reset_brain_damage)
-    ax = plt.axes([0.0, 0.15, 0.2, 0.075])
-    brainDmgButton = Button(ax, ADD_BRAIN_DEMAGE_LABEL)
-    brainDmgButton.on_clicked(add_brain_damage)
+    if show_weights:
+        ax = plt.axes([0.0, 0.075, 0.2, 0.075])
+        b_reset_dmg = Button(ax, 'Reset dagmage')
+        b_reset_dmg.on_clicked(reset_brain_damage)
+        ax = plt.axes([0.0, 0.15, 0.2, 0.075])
+        brainDmgButton = Button(ax, ADD_BRAIN_DEMAGE_LABEL)
+        brainDmgButton.on_clicked(add_brain_damage)
 
 
     s_rect = SelectionRect(imgax, fig.canvas, on_box_release)
@@ -162,17 +167,17 @@ def hopfield20by20():
     # pause_and_update()
 
     def plt_do_sync_iteration(event):
-        hopfield.asci_print(h.network)
+        asci_print(h.network)
         h.sync_update()
         pltimage.set_data(h.network)
         plt.draw()
     def plt_do_ordered_async_iteration(event):
-        hopfield.asci_print(h.network)
+        # asci_print(h.network)
         h.async_update_ordered(pause_and_update)
         pltimage.set_data(h.network)
         plt.draw()
     def plt_do_shuffle_async_iteration(event):
-        hopfield.asci_print(h.network)
+        # asci_print(h.network)
         h.async_update_shuffeled(pause_and_update)
         pltimage.set_data(h.network)
         plt.draw()
@@ -251,17 +256,17 @@ def hopfield4by4():
     pltimage = imgax.imshow(h.network, cmap=plt.get_cmap("binary"))
 
     def plt_do_sync_iteration(event):
-        hopfield.asci_print(h.network)
+        asci_print(h.network)
         h.sync_update()
         pltimage.set_data(h.network)
         plt.draw()
     def plt_do_ordered_async_iteration(event):
-        hopfield.asci_print(h.network)
+        # asci_print(h.network)
         h.async_update_ordered(pause_and_update)
         pltimage.set_data(h.network)
         plt.draw()
     def plt_do_shuffle_async_iteration(event):
-        hopfield.asci_print(h.network)
+        # asci_print(h.network)
         h.async_update_shuffeled(pause_and_update)
         pltimage.set_data(h.network)
         plt.draw()
@@ -315,22 +320,22 @@ def hopfield3by3():
         pltimage.set_data(h.network)
         plt.draw()
     def plt_do_sync_iteration(event):
-        hopfield.asci_print(h.network)
+        asci_print(h.network)
         h.sync_update()
         pltimage.set_data(h.network)
         plt.draw()
     def plt_do_ordered_async_iteration(event):
-        hopfield.asci_print(h.network)
+        asci_print(h.network)
         h.async_update_ordered(pause_and_update)
         pltimage.set_data(h.network)
         plt.draw()
     def plt_do_inv_ordered_async_iteration(event):
-        hopfield.asci_print(h.network)
+        asci_print(h.network)
         h.async_update_ordered_inv(pause_and_update)
         pltimage.set_data(h.network)
         plt.draw()
     def plt_do_shuffle_async_iteration(event):
-        hopfield.asci_print(h.network)
+        asci_print(h.network)
         h.async_update_shuffeled(pause_and_update)
         pltimage.set_data(h.network)
         plt.draw()
@@ -365,7 +370,7 @@ def hopfield3by3():
 
 
 # hopfield4by4()#---wasted
-# hopfield3by3()
+hopfield3by3()
 # hopfield20by20()
 # asterixObelix()
-asterixObelix(True) # show weights
+# asterixObelix(True) # show weights
