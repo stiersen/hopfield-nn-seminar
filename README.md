@@ -1,1 +1,2 @@
-# hopfield-nn-seminar
+# Hopfield model - phase transitions
+Example program to demonstrate the spin-glass transition at T=0 and the influence of temperature on the asterix demo (https://github.com/toger5/hopfield-nn-seminar).
